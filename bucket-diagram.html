@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<style>
+html{height:100%;}
+body {
+    font-family: '微软雅黑';
+    font-size: 20px;
+    
+    background:linear-gradient(#ccc,#fff 2%);
+}
+.container{margin:0 auto;max-width:1200px;}
+.container h1{text-align:center;font-weight:normal;}
+.init {
+	position:relative;
+    text-align: center;
+}
+
+.init > span {
+    display: inline-block;
+    /*padding: 20px;*/
+    width: 80px;
+    height:80px;
+    line-height:80px;
+    overflow:hidden;
+}
+
+.blood{position:absolute;left:86px;top:50%;margin-top:-4px;height:8px;width:38%;background:#c00 linear-gradient(#f00,#c00);transition:.5s;}
+#blood2{left:auto;right:86px;background:#00c linear-gradient(#00f,#00c);}
+.pname {
+	position:absolute;left:0;top:0;z-index:10;
+    background:radial-gradient(at 20px 20px,#efefef,#ccc,#dfdfdf);
+    border-radius:50%;
+    border:4px solid #c00;transition:.5s;
+    color:#666;text-shadow:1px 1px #eee;
+    transition:transform 1s;
+}
+.init .pname:last-of-type{left:auto;right:0;border-color:#00c;}
+
+.vs {
+    color: red;font-size:38px;
+}
+
+.pkbtn {
+    font-size: 28px;
+    background: #3385ff;
+    border-radius: 3px;
+    padding: 8px 20px;
+    width: 100px;
+    margin: 20px auto;
+    cursor: pointer;
+    color:#fff;
+    text-align:center;
+}
+
+.pkcontent {
+    font-size: 16px;
+    margin: 0 15%;
+}
+.winner{transform:scale(2);animation:win .5s infinite;}
+@keyframes win{
+    0%{box-shadow:0 0 10px rgba(255,0,0,1);font-weight:bold;}
+    100%{box-shadow:0 0 10px rgba(255,255,0,1);color:#f00;}
+}
+</style>
+<script>
+var isPking = false;
+var namelist = ['贱豪哥','秦司机','徐开车','隔壁老王','翻墙老宋','兄贵1号','伪娘唐宇','带把小妹']; //45个
+
+var sklist = ["发起了猛♂烈的进攻，肛得对方跪在地上, 敌方损失了",
+    "喝了一口大力丸药水，一*甩在对方脸上，敌方损失了",
+    "进了一趟小漠娃娃店，掏出失传已久的神物-‘**杯’，敌方损失了",
+    "把对方按在地上摩擦，哎哟卧槽，起火了，敌方损失了",
+    "和对方的弟弟握了一下手，敌方损失了",
+    "抱住对方的老婆，敌方损失了",
+    "大喊一声，信彬哥，得永生，敌方损失了",
+    "抢走对方的充气娃娃，敌方损失了",
+    "付了100块充VIP，敌方损失了"
+];
+window.onload = function() {
+    var index = getRandomIndex();
+    var oPerson1 = document.getElementsByClassName("pname")[0];
+    oPerson1.innerHTML = namelist[index];
+
+    index2 = getRandomIndex();
+    while(index == index2){
+        index2 = getRandomIndex();
+    }
+    var oPerson2 = document.getElementsByClassName("pname")[1];
+    oPerson2.innerHTML = namelist[index2];
+
+    function getRandomIndex(){
+        return Math.ceil(Math.random() * (namelist.length-1));
+    }
+}
+
+function startPK() {
+    if (isPking) {
+        return;
+    }
+
+    isPking = true;
+    var oContent = document.getElementsByClassName("pkcontent")[0];
+    var oMsg = document.getElementById("msg_end");
+    var oBlood1 = document.getElementById('blood1');
+    var oBlood2 = document.getElementById('blood2');
+	var bloodWidth1 = oBlood1.offsetWidth;
+    var bloodWidth2 = oBlood2.offsetWidth;
+    oBlood1.style.width = bloodWidth1 + 'px';
+    oBlood2.style.width = bloodWidth2 + 'px';
+    oContent.innerHTML = "";
+    var times = 1; //当前是第几轮攻击
+    var turn = 1; //轮到谁攻击，1 是 A  -1 是 B
+    var oPerson1 = document.getElementsByClassName("pname")[0];
+    oPerson1.hp = 100;
+    var oPerson2 = document.getElementsByClassName("pname")[1];
+    oPerson2.hp = 100;
+    var timer = setInterval(fight, 200);
+
+    function fight() {
+        var oP = document.createElement("p");
+        var kill = sklist[parseInt(Math.random() * 9)]; //本轮使用的技能
+        var damage = parseInt(Math.random() * 30); //本轮造成的伤害
+        
+        if (turn > 0) {
+            oP.innerHTML = "第" + times + "轮：【" + oPerson1.innerHTML + "】" + kill + damage + "格精力";
+            oPerson2.hp -= damage;
+        } else {
+            oP.innerHTML = "第" + times + "轮：【" + oPerson2.innerHTML + "】" + kill + damage + "格精力";
+            oPerson1.hp -= damage;
+        }
+
+        //血量减少效果
+        oBlood1.style.width = oPerson1.hp<=0 ? 0 : Math.ceil(bloodWidth1 * oPerson1.hp/100) + 'px';
+        oBlood2.style.width = oPerson2.hp<=0 ? 0 : Math.ceil(bloodWidth2 * oPerson2.hp/100) + 'px';
+        oContent.appendChild(oP);
+        console.log(oBlood1.style.width,oBlood2.style.width);
+        console.log(oPerson1.hp,oPerson2.hp)
+        
+
+        if (oPerson1.hp <= 0 || oPerson2.hp <= 0) {
+            clearInterval(timer); //清理定时器
+            var over = document.createElement("p");
+            over.style.color = "red";
+            over.innerHTML = (oPerson1.hp < 0 ? oPerson1.innerHTML : oPerson2.innerHTML) + "个菜B，GG思密达";
+            oContent.appendChild(over); //增加最后一行，输出游戏结束
+            isPking = false; //打斗标识设为false,标识打完了
+            if(oPerson1.hp < 0){
+                oPerson1.style.borderColor = '#888888';
+                oPerson2.className += ' winner';
+            }else{
+                oPerson2.style.borderColor = '#888888';
+                oPerson1.className += ' winner';
+            }
+        }
+        times++; //进入下一轮攻击
+        turn *= -1; //转为下一个人攻击
+        oMsg.scrollIntoView(); //滚动条自动滚动至底部
+    }
+
+}
+</script>
+
+<body>
+    <div class="container">
+        <h1>睡你麻痹，起来hi</h1>
+    <div class="init">
+        <span class="pname">渣渣</span>
+        <span class="vs">VS</span>
+        <span class="pname">辣鸡</span>
+        <div class="blood" id="blood1"></div>
+        <div class="blood" id="blood2"></div>
+    </div>
+    <div class="pkbtn" onclick="startPK()">肛起来</div>
+    <div class="pkcontent">
+    </div>
+    <div id="msg_end" style="height:0px; overflow:hidden"></div>
+    </div>
+</body>
+
+</html>
